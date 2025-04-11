@@ -7,6 +7,9 @@ def call(Map configMap){
         timeout(time: 30, unit: 'MINUTES')
         disableConcurrentBuilds()
     }
+    parameters{
+            booleanParam(name: 'deploy', defaultValue: false, description: 'Select to deploy or not')
+        }
     environment {
         appVersion = '' // this will become global, we can use across pipeline
         region = 'us-east-1'
