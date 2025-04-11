@@ -74,21 +74,19 @@ def call(Map configMap){
         }
 
         stage('Deploy'){
-            steps{
-              withAWS(region: 'us-east-1', credentials: 'aws-creds') {
-                    sh """
-                        aws eks update-kubeconfig --region ${region} --name ${project}-${environment}
-                        cd helm-1
-                        sed -i 's/IMAGE_VERSION/${appVersion}/g' values-${environment}.yaml
-                        helm upgrade --install ${component} -n ${project} -f values-${environment}.yaml .
-                    """
+            when{
+                    expression {params.deploy}
                 }
 
+            steps{
+                build job: "../${component}-cd", parameters: [
+                    string(name: 'version', value: "$appVersion"),
+                    string(name: 'ENVIRONMENT', value: "dev"),
+                ], wait: true
             }
         }
-        
     }
-
+    
     post {
         always{
             echo "This sections runs always"
@@ -101,6 +99,7 @@ def call(Map configMap){
             echo "This section run when pipeline failure"
         }
     }
-}
+
+    }
 
 }
